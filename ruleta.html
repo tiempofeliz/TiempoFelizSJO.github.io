@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta Profesional</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+<link rel="stylesheet" href="stylesruleta.css">
+</head>
+
+<body>
+    <div class="contenedor-ruleta">
+        <h1>🎡 Ruleta Profesional</h1>
+        <p class="subtitulo">La flecha siempre señalará el ganador correcto.</p>
+
+        <div class="canvas-box">
+            <div class="flecha"></div>
+            <canvas id="ruleta" width="560" height="560"></canvas>
+        </div>
+
+        <div class="botones">
+            <button id="girar">🎲 GIRAR</button>
+            <button id="reiniciar">🔄 REINICIAR</button>
+        </div>
+
+        <div id="resultado">Aquí aparecerá la tarea ganadora.</div>
+    </div>
+
+    <a href="../index.html" class="btn-inicio">🏠 Volver al Inicio</a>
+
+    <script>
+        const canvas = document.getElementById("ruleta");
+        const ctx = canvas.getContext("2d");
+        const btnGirar = document.getElementById("girar");
+        const btnReiniciar = document.getElementById("reiniciar");
+        const resultado = document.getElementById("resultado");
+
+        const centro = canvas.width / 2;
+        const radio = 235;
+
+        let tareas = []; 
+        let anguloActual = 0;
+        let girando = false;
+
+        const colores = [
+            "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16", "#22c55e",
+            "#10b981", "#14b8a6", "#06b6d4", "#0ea5e9", "#3b82f6", "#6366f1",
+            "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#f43f5e", "#fb7185"
+        ];
+
+        function cargarTareas() {
+            tareas = [];
+            const datosAgenda = localStorage.getItem("agenda");
+
+            if (datosAgenda) {
+                try {
+                    const listaCompleta = JSON.parse(datosAgenda);
+                    if (Array.isArray(listaCompleta)) {
+                        const pendientes = listaCompleta.filter(t => t && t.estado !== "Completada");
+                        tareas = pendientes
+                            .map(t => t.actividad)
+                            .filter(act => act && act.trim() !== "");
+                    }
+                } catch (e) {
+                    console.error("Error al leer la agenda:", e);
+                }
+            }
+
+            if (tareas.length === 0) {
+                dibujarRuletaVacia();
+            } else {
+                dibujarRuleta();
+            }
+        }
+
+        function dibujarRuletaVacia() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.arc(centro, centro, radio, 0, Math.PI * 2);
+            ctx.fillStyle = "#f8fafc";
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.stroke();
+
+            ctx.fillStyle = "#64748b";
+            ctx.font = "bold 16px Poppins";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("No tienes tareas pendientes en tu agenda.", centro, centro);
+        }
+
+        function cortarTexto(texto, maximo) {
+            if (texto.length <= maximo) return texto;
+            return texto.substring(0, maximo) + "...";
+        }
+
+        function dibujarRuleta() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (tareas.length === 0) return;
+
+            if (tareas.length === 1) {
+                ctx.beginPath();
+                ctx.arc(centro, centro, radio, 0, Math.PI * 2);
+                ctx.fillStyle = colores[11];
+                ctx.fill();
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = "#ffffff";
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(centro, centro);
+                ctx.rotate(anguloActual); 
+                ctx.fillStyle = "#FFFFFF";
+                ctx.font = "bold 15px Poppins";
+                ctx.textBaseline = "middle";
+                ctx.textAlign = "right";
+                ctx.fillText(cortarTexto(tareas[0], 18).toUpperCase(), radio - 35, 0);
+                ctx.restore();
+            } else {
+                const arco = (Math.PI * 2) / tareas.length;
+
+                for (let i = 0; i < tareas.length; i++) {
+                    const inicio = anguloActual + (i * arco);
+                    const fin = inicio + arco;
+
+                    ctx.beginPath();
+                    ctx.moveTo(centro, centro);
+                    ctx.arc(centro, centro, radio, inicio, fin);
+                    ctx.closePath();
+                    ctx.fillStyle = colores[i % colores.length];
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.stroke();
+
+                    ctx.save();
+                    ctx.translate(centro, centro);
+                    const anguloTexto = inicio + (arco / 2);
+                    ctx.rotate(anguloTexto);
+
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.font = tareas.length > 8 ? "bold 12px Poppins" : "bold 14px Poppins";
+                    ctx.textBaseline = "middle";
+
+                    let textoMostrar = cortarTexto(tareas[i], 16).toUpperCase();
+                    const anguloNormalizado = anguloTexto % (Math.PI * 2);
+
+                    if (anguloNormalizado > Math.PI / 2 && anguloNormalizado < Math.PI * 1.5) {
+                        ctx.rotate(Math.PI);
+                        ctx.textAlign = "left";
+                        ctx.fillText(textoMostrar, -(radio - 35), 0);
+                    } else {
+                        ctx.textAlign = "right";
+                        ctx.fillText(textoMostrar, radio - 35, 0);
+                    }
+                    ctx.restore();
+                }
+            }
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(centro, centro, 40, 0, Math.PI * 2);
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fill();
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = "#4338CA";
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(centro, centro, 16, 0, Math.PI * 2);
+            ctx.fillStyle = "#4338CA";
+            ctx.fill();
+            ctx.restore();
+        }
+
+        btnGirar.addEventListener("click", () => {
+            if (girando || tareas.length === 0) return;
+
+            girando = true;
+            btnGirar.disabled = true;
+            resultado.innerHTML = "🎲 Girando...";
+
+            const vueltas = 7 + Math.random() * 5;
+            const anguloFinal = anguloActual + (vueltas * Math.PI * 2);
+            const anguloInicial = anguloActual;
+            const duracion = 4000;
+            let inicio = null;
+
+            function animar(time) {
+                if (!inicio) inicio = time;
+                let progreso = (time - inicio) / duracion;
+                if (progreso > 1) progreso = 1;
+
+                const t = 1 - Math.pow(1 - progreso, 4);
+                anguloActual = anguloInicial + (anguloFinal - anguloInicial) * t;
+                dibujarRuleta();
+
+                if (progreso < 1) {
+                    requestAnimationFrame(animar);
+                } else {
+                    girando = false;
+                    btnGirar.disabled = false;
+                    calcularGanador();
+                }
+            }
+            requestAnimationFrame(animar);
+        });
+
+        function calcularGanador() {
+            if (tareas.length === 0) return;
+            const arco = (Math.PI * 2) / tareas.length;
+            let angulo = (Math.PI * 1.5 - anguloActual) % (Math.PI * 2);
+            if (angulo < 0) angulo += Math.PI * 2;
+
+            const indice = Math.floor(angulo / arco) % tareas.length;
+            const ganadora = tareas[indice];
+
+            resultado.innerHTML = "🏆 Tarea Ganadora:<br><br><span style='font-size:28px; color:#ffffff; font-weight:700;'>" + ganadora.toUpperCase() + "</span>";
+
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.85 },
+                disableForced3d: true
+            });
+        }
+
+        btnReiniciar.addEventListener("click", () => {
+            anguloActual = 0;
+            resultado.innerHTML = "Aquí aparecerá la tarea ganadora.";
+            cargarTareas();
+        });
+
+        window.addEventListener("storage", () => cargarTareas());
+        window.onload = () => cargarTareas();
+    </script>
+</body>
+
+</html>

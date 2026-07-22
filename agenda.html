@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Agenda | Tiempo Feliz</title>
+
+<link rel="stylesheet" href="stylesagenda.css">
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<h1>📅 Agenda Inteligente</h1>
+
+<div class="panel">
+
+<input
+type="date"
+id="fecha">
+
+<input
+type="text"
+id="actividad"
+placeholder="Actividad">
+
+<select id="prioridad">
+
+<option>Alta</option>
+<option>Media</option>
+<option>Baja</option>
+
+</select>
+
+<input
+type="time"
+id="hora">
+
+</div>
+
+<button
+class="btnAgregar"
+onclick="agregarTarea()">
+
+➕ Agregar Tarea
+
+</button>
+
+<div class="tabla">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Fecha</th>
+<th>Hora</th>
+<th>Actividad</th>
+<th>Prioridad</th>
+<th>Estado</th>
+<th>Acción</th>
+
+</tr>
+
+</thead>
+
+<tbody id="listaTareas">
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="resumen">
+
+<div class="tarjeta">
+
+<h2 id="totalTareas">0</h2>
+
+<p>Total</p>
+
+</div>
+
+<div class="tarjeta">
+
+<h2 id="pendientes">0</h2>
+
+<p>Pendientes</p>
+
+</div>
+
+<div class="tarjeta">
+
+<h2 id="proceso">0</h2>
+
+<p>En proceso</p>
+
+</div>
+
+<div class="tarjeta">
+
+<h2 id="completadas">0</h2>
+
+<p>Completadas</p>
+
+</div>
+
+</div>
+
+<div class="inicio">
+
+<a href="../index.html">
+
+🏠 Volver al Inicio
+
+</a>
+
+</div>
+<script>
+
+let tareas = JSON.parse(localStorage.getItem("agenda")) || [];
+
+// ==========================
+// CARGAR
+// ==========================
+
+window.onload = function(){
+
+    if(localStorage.getItem("tema")=="oscuro"){
+
+        document.body.classList.add("dark-mode");
+
+    }
+
+    mostrarTareas();
+
+}
+
+// ==========================
+// AGREGAR TAREA
+// ==========================
+
+function agregarTarea(){
+
+    let fecha=document.getElementById("fecha").value;
+    let actividad=document.getElementById("actividad").value.trim();
+    let prioridad=document.getElementById("prioridad").value;
+    let hora=document.getElementById("hora").value;
+
+    if(fecha=="" || actividad=="" || hora==""){
+
+        alert("Completa todos los campos");
+        return;
+
+    }
+
+    tareas.push({
+
+        fecha:fecha,
+        actividad:actividad,
+        prioridad:prioridad,
+        hora:hora,
+        estado:"Pendiente",
+        recompensa:false
+
+    });
+
+    localStorage.setItem("agenda",JSON.stringify(tareas));
+
+    document.getElementById("fecha").value="";
+    document.getElementById("actividad").value="";
+    document.getElementById("hora").value="";
+
+    mostrarTareas();
+
+}
+
+// ==========================
+// MOSTRAR TAREAS
+// ==========================
+
+function mostrarTareas(){
+
+    let lista=document.getElementById("listaTareas");
+
+    lista.innerHTML="";
+
+    let pendientes=0;
+    let proceso=0;
+    let completadas=0;
+
+    tareas.forEach(function(tarea,index){
+
+        if(tarea.estado=="Pendiente") pendientes++;
+        if(tarea.estado=="En proceso") proceso++;
+        if(tarea.estado=="Completada") completadas++;
+
+        lista.innerHTML+=`
+
+<tr>
+
+<td>${tarea.fecha}</td>
+
+<td>${tarea.hora}</td>
+
+<td>${tarea.actividad}</td>
+
+<td>${tarea.prioridad}</td>
+
+<td>
+
+<select
+class="estado"
+onchange="cambiarEstado(${index},this.value)">
+
+<option value="Pendiente"
+${tarea.estado=="Pendiente"?"selected":""}>
+⏳ Pendiente
+</option>
+
+<option value="En proceso"
+${tarea.estado=="En proceso"?"selected":""}>
+🔄 En proceso
+</option>
+
+<option value="Completada"
+${tarea.estado=="Completada"?"selected":""}>
+✅ Completada
+</option>
+
+</select>
+
+</td>
+
+<td class="acciones">
+
+<button
+class="editar"
+onclick="editar(${index})">
+
+✏️
+
+</button>
+
+<button
+class="eliminar"
+onclick="eliminar(${index})">
+
+🗑️
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+    });
+
+    document.getElementById("totalTareas").innerHTML=tareas.length;
+    document.getElementById("pendientes").innerHTML=pendientes;
+    document.getElementById("proceso").innerHTML=proceso;
+    document.getElementById("completadas").innerHTML=completadas;
+
+}
+// ==========================
+// CAMBIAR ESTADO
+// ==========================
+
+function cambiarEstado(index, estado){
+
+    tareas[index].estado = estado;
+
+    if(estado=="Completada" && !tareas[index].recompensa){
+
+        tareas[index].recompensa = true;
+
+        let puntos = Number(localStorage.getItem("puntos")) || 0;
+        let xp = Number(localStorage.getItem("xp")) || 0;
+        let nivel = Number(localStorage.getItem("nivel")) || 1;
+        let tareasCompletadas = Number(localStorage.getItem("tareas")) || 0;
+        let racha = Number(localStorage.getItem("racha")) || 1;
+
+        puntos += 10;
+        xp += 10;
+        tareasCompletadas++;
+
+        // Subir de nivel automáticamente
+        while(xp >= 100){
+            xp -= 100;
+            nivel++;
+            alert("🎉 ¡Felicidades! Subiste al Nivel " + nivel);
+        }
+
+        localStorage.setItem("puntos", puntos);
+        localStorage.setItem("xp", xp);
+        localStorage.setItem("nivel", nivel);
+        localStorage.setItem("tareas", tareasCompletadas);
+        localStorage.setItem("racha", racha);
+
+    }
+
+    localStorage.setItem("agenda", JSON.stringify(tareas));
+
+    mostrarTareas();
+
+}
+
+// ==========================
+// EDITAR
+// ==========================
+
+function editar(index){
+
+    let nuevo = prompt("Editar actividad:", tareas[index].actividad);
+
+    if(nuevo==null) return;
+
+    nuevo = nuevo.trim();
+
+    if(nuevo=="") return;
+
+    tareas[index].actividad = nuevo;
+
+    localStorage.setItem("agenda", JSON.stringify(tareas));
+
+    mostrarTareas();
+
+}
+
+// ==========================
+// ELIMINAR
+// ==========================
+
+function eliminar(index){
+
+    if(confirm("¿Eliminar esta tarea?")){
+
+        tareas.splice(index,1);
+
+        localStorage.setItem("agenda", JSON.stringify(tareas));
+
+        mostrarTareas();
+
+    }
+
+}
+
+// ==========================
+// ACTUALIZAR AUTOMÁTICAMENTE
+// ==========================
+
+setInterval(function(){
+
+    tareas = JSON.parse(localStorage.getItem("agenda")) || [];
+
+    mostrarTareas();
+
+},1000);
+
+</script>
+
+</body>
+
+</html>
