@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mi Perfil | Tiempo Feliz</title>
+<link rel="stylesheet" href="stylesperfil.css">
+</head>
+
+<body>
+<a href="../index.html" class="btn-inicio">
+    🏠 Ir al Inicio
+</a>
+<div class="perfil">
+
+<div class="titulo">
+
+<h1>👤 Mi Perfil</h1>
+
+</div>
+
+<div class="cabecera">
+
+<div class="foto">
+
+<img id="preview">
+
+<br><br>
+
+<input
+type="file"
+id="fotoPerfil"
+accept="image/*">
+
+</div>
+
+<div class="info">
+
+<h2 id="nombrePerfil">Tu Nombre</h2>
+
+<p id="usuarioPerfil">@usuario</p>
+
+<p>Organiza tu tiempo, alcanza tus metas y gana recompensas.</p>
+
+</div>
+
+</div>
+
+<div class="estadisticas">
+
+<div>
+
+<h2>125</h2>
+
+<p>Puntos</p>
+
+</div>
+
+<div>
+
+<h2>12</h2>
+
+<p>Tareas</p>
+
+</div>
+
+<div>
+
+<h2>3</h2>
+
+<p>Racha</p>
+
+</div>
+
+</div>
+
+<input
+type="text"
+id="nombre"
+placeholder="Nombre completo">
+
+<input
+type="email"
+id="correo"
+placeholder="Correo electrónico">
+
+<input
+type="text"
+id="usuario"
+placeholder="Usuario">
+
+<button onclick="guardarPerfil()">
+
+💾 Guardar Perfil
+
+</button>
+
+<a href="../index.html">
+
+<button class="inicio">
+
+🏠 Inicio
+
+</button>
+
+</a>
+
+<script>
+    // ==========================
+// APLICAR TEMA
+// ==========================
+
+function aplicarTema(){
+
+    if(localStorage.getItem("tema")=="oscuro"){
+
+        document.body.classList.add("dark-mode");
+
+    }else{
+
+        document.body.classList.remove("dark-mode");
+
+    }
+
+}
+
+// ==========================
+// CAMBIAR FOTO
+// ==========================
+
+document.getElementById("fotoPerfil").addEventListener("change",function(e){
+
+    let archivo=e.target.files[0];
+
+    if(!archivo) return;
+
+    let lector=new FileReader();
+
+    lector.onload=function(x){
+
+        document.getElementById("preview").src=x.target.result;
+
+        localStorage.setItem("fotoPerfil",x.target.result);
+
+    }
+
+    lector.readAsDataURL(archivo);
+
+});
+
+// ==========================
+// GUARDAR PERFIL
+// ==========================
+
+function guardarPerfil(){
+
+    let nombre=document.getElementById("nombre").value.trim();
+    let correo=document.getElementById("correo").value.trim();
+    let usuario=document.getElementById("usuario").value.trim();
+
+    if(nombre==""){
+
+        alert("Escribe tu nombre.");
+
+        return;
+
+    }
+
+    localStorage.setItem("nombre",nombre);
+    localStorage.setItem("correo",correo);
+    localStorage.setItem("usuario",usuario);
+
+    document.getElementById("nombrePerfil").textContent=nombre;
+    document.getElementById("usuarioPerfil").textContent="@"+usuario;
+
+    alert("✅ Perfil guardado correctamente.");
+
+}
+
+// ==========================
+// CARGAR DATOS
+// ==========================
+
+window.onload=function(){
+
+    aplicarTema();
+
+    document.getElementById("nombre").value=
+    localStorage.getItem("nombre") || "";
+
+    document.getElementById("correo").value=
+    localStorage.getItem("correo") || "";
+
+    document.getElementById("usuario").value=
+    localStorage.getItem("usuario") || "";
+
+    document.getElementById("nombrePerfil").textContent=
+    localStorage.getItem("nombre") || "Tu Nombre";
+
+    document.getElementById("usuarioPerfil").textContent=
+    "@"+(localStorage.getItem("usuario") || "usuario");
+
+    let foto=localStorage.getItem("fotoPerfil");
+
+    if(foto){
+
+        document.getElementById("preview").src=foto;
+
+    }
+
+}
+
+// ==========================
+// ACTUALIZAR TEMA SI CAMBIA
+// ==========================
+
+setInterval(aplicarTema,300);
+
+</script>
+
+</body>
+<div class="menu">
+
+</html>

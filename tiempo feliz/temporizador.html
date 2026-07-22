@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temporizador | Tiempo Feliz</title>
+
+<link rel="stylesheet" href="styletemporizador.css">
+</head>
+
+<body>
+<a href="../index.html" class="btn-inicio">
+    🏠 Ir al Inicio
+</a>
+<div class="card">
+
+<h1>⏰ Temporizador</h1>
+
+<div class="inputs">
+
+<input
+type="number"
+id="h"
+placeholder="Horas"
+min="0"
+max="24">
+
+<input
+type="number"
+id="m"
+placeholder="Minutos"
+min="0"
+max="59">
+
+<input
+type="number"
+id="s"
+placeholder="Segundos"
+min="0"
+max="59">
+
+</div>
+
+<div id="tiempo">00:00:00</div>
+
+<div class="estado" id="estado">
+
+Listo para comenzar
+
+</div>
+
+<div class="botones">
+
+<button id="start">
+▶ Iniciar
+</button>
+
+<button id="pause">
+⏸ Pausar
+</button>
+
+<button id="reset">
+🔄 Reiniciar
+</button>
+
+</div>
+
+<div class="barra">
+
+<div id="progreso"></div>
+
+</div>
+<script>
+
+let restante = 0;
+let inicial = 0;
+let intervalo = null;
+
+const tiempo = document.getElementById("tiempo");
+const progreso = document.getElementById("progreso");
+const estado = document.getElementById("estado");
+
+/* ==========================
+   MODO OSCURO
+========================== */
+
+if(localStorage.getItem("tema") === "oscuro"){
+
+    document.body.classList.add("dark-mode");
+
+}
+
+/* ==========================
+   MOSTRAR TIEMPO
+========================== */
+
+function mostrar(){
+
+    let h = Math.floor(restante / 3600);
+    let m = Math.floor((restante % 3600) / 60);
+    let s = restante % 60;
+
+    tiempo.textContent =
+    String(h).padStart(2,"0") + ":" +
+    String(m).padStart(2,"0") + ":" +
+    String(s).padStart(2,"0");
+
+    if(inicial > 0){
+
+        let porcentaje = (restante / inicial) * 100;
+
+        progreso.style.width = porcentaje + "%";
+
+    }else{
+
+        progreso.style.width = "100%";
+
+    }
+
+}
+
+/* ==========================
+   INICIAR
+========================== */
+
+document.getElementById("start").onclick = function(){
+
+    if(intervalo != null){
+
+        return;
+
+    }
+
+    if(restante === 0){
+
+        let h = parseInt(document.getElementById("h").value) || 0;
+        let m = parseInt(document.getElementById("m").value) || 0;
+        let s = parseInt(document.getElementById("s").value) || 0;
+
+        if(h > 24 || m > 59 || s > 59){
+
+            alert("Tiempo inválido.");
+            return;
+
+        }
+
+        if(h == 24 && (m > 0 || s > 0)){
+
+            alert("El máximo permitido es 24:00:00");
+            return;
+
+        }
+
+        if(h == 0 && m == 0 && s == 0){
+
+            alert("Debes ingresar un tiempo.");
+            return;
+
+        }
+
+        restante = (h * 3600) + (m * 60) + s;
+
+        inicial = restante;
+
+    }
+
+    estado.textContent = "⏳ Temporizador en marcha";
+
+    mostrar();
+
+    intervalo = setInterval(function(){
+
+        restante--;
+
+        mostrar();
+
+        if(restante <= 0){
+
+            clearInterval(intervalo);
+
+            intervalo = null;
+
+            restante = 0;
+
+            mostrar();
+
+            estado.textContent = "✅ Tiempo finalizado";
+
+            alert("⏰ ¡El tiempo terminó!");
+
+        }
+
+    },1000);
+
+}
+/* ==========================
+   PAUSAR
+========================== */
+
+document.getElementById("pause").onclick = function(){
+
+    clearInterval(intervalo);
+    intervalo = null;
+
+    if(restante > 0){
+        estado.textContent = "⏸ Temporizador pausado";
+    }
+
+}
+
+/* ==========================
+   REINICIAR
+========================== */
+
+document.getElementById("reset").onclick = function(){
+
+    clearInterval(intervalo);
+    intervalo = null;
+
+    restante = 0;
+    inicial = 0;
+
+    document.getElementById("h").value = "";
+    document.getElementById("m").value = "";
+    document.getElementById("s").value = "";
+
+    estado.textContent = "Listo para comenzar";
+
+    progreso.style.width = "100%";
+
+    mostrar();
+
+}
+
+/* ==========================
+   INICIAR PANTALLA
+========================== */
+
+mostrar();
+
+</script>
+
+</body>
+
+</html>

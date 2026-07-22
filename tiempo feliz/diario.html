@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mi Diario</title>
+
+<link rel="stylesheet" href="stylesdiario.css">
+
+</head>
+
+<body>
+<a href="../index.html" class="btn-inicio">
+    🏠 Ir al Inicio
+</a>
+
+<div class="app">
+
+<div class="header">
+<h1>📖 Mi Diario</h1>
+</div>
+
+<div class="editor">
+
+<textarea
+id="textoNota"
+placeholder="Escribe aquí tu pensamiento...">
+</textarea>
+
+<button
+class="btn"
+onclick="guardarNota()">
+
+Guardar Nota
+
+</button>
+
+</div>
+
+<div
+class="notas"
+id="listaNotas">
+
+</div>
+<script>
+
+// ===== MODO OSCURO =====
+function aplicarTema(){
+
+    if(localStorage.getItem("tema")=="oscuro"){
+        document.body.classList.add("dark");
+    }else{
+        document.body.classList.remove("dark");
+    }
+
+}
+
+window.onload=function(){
+
+    aplicarTema();
+
+    mostrarNotas();
+
+};
+
+window.addEventListener("focus",aplicarTema);
+
+// ===== NOTAS =====
+
+let notas=JSON.parse(localStorage.getItem("notas")) || [];
+
+function guardarNota(){
+
+    let texto=document.getElementById("textoNota").value.trim();
+
+    if(texto==""){
+        alert("Escribe una nota.");
+        return;
+    }
+
+    notas.push({
+
+        texto:texto,
+        fecha:new Date().toLocaleString()
+
+    });
+
+    localStorage.setItem("notas",JSON.stringify(notas));
+
+    document.getElementById("textoNota").value="";
+
+    mostrarNotas();
+
+}
+
+function mostrarNotas(){
+
+    let lista=document.getElementById("listaNotas");
+
+    lista.innerHTML="";
+
+    notas.slice().reverse().forEach((nota,i)=>{
+
+        lista.innerHTML+=`
+
+        <div class="card">
+
+            <div class="fecha">
+                📅 ${nota.fecha}
+            </div>
+
+            <div class="texto">
+                ${nota.texto}
+            </div>
+
+            <button class="btn"
+            onclick="editarNota(${notas.length-1-i})">
+            ✏️ Editar
+            </button>
+
+            <button class="delete"
+            onclick="eliminarNota(${notas.length-1-i})">
+            🗑️ Eliminar
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+function editarNota(i){
+
+    let nuevo=prompt("Editar nota",notas[i].texto);
+
+    if(nuevo!=null && nuevo.trim()!=""){
+
+        notas[i].texto=nuevo;
+
+        localStorage.setItem("notas",JSON.stringify(notas));
+
+        mostrarNotas();
+
+    }
+
+}
+
+function eliminarNota(i){
+
+    if(confirm("¿Eliminar nota?")){
+
+        notas.splice(i,1);
+
+        localStorage.setItem("notas",JSON.stringify(notas));
+
+        mostrarNotas();
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

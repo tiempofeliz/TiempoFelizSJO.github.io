@@ -1,0 +1,213 @@
+.btn-inicio{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#2563eb;
+    color:white;
+    text-decoration:none;
+    padding:14px 24px;
+    border-radius:12px;
+    font-weight:bold;
+    box-shadow:0 8px 20px rgba(0,0,0,.3);
+    transition:.3s;
+    z-index:999;
+}
+
+.btn-inicio:hover{
+    background:#1d4ed8;
+    transform:translateY(-3px);
+}
+
+body.dark-mode .btn-inicio{
+    background:#4f46e5;
+}
+
+body.dark-mode .btn-inicio:hover{
+    background:#4338ca;
+}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+transition:.3s;
+}
+
+body{
+background:linear-gradient(135deg,#4facfe,#00f2fe);
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:30px;
+}
+
+body.dark-mode{
+background:linear-gradient(135deg,#0f172a,#1e293b,#111827);
+color:white;
+}
+
+.perfil{
+
+width:100%;
+max-width:950px;
+background:white;
+border-radius:25px;
+padding:35px;
+box-shadow:0 15px 40px rgba(0,0,0,.25);
+
+}
+
+body.dark-mode .perfil{
+
+background:#1f2937;
+
+}
+
+.titulo{
+
+text-align:center;
+margin-bottom:35px;
+
+}
+
+.titulo h1{
+
+font-size:38px;
+color:#2563eb;
+
+}
+
+body.dark-mode .titulo h1{
+
+color:#60a5fa;
+
+}
+
+.cabecera{
+
+display:flex;
+gap:40px;
+flex-wrap:wrap;
+align-items:center;
+
+}
+
+.foto{
+
+width:220px;
+text-align:center;
+
+}
+
+#preview{
+
+width:180px;
+height:180px;
+border-radius:50%;
+object-fit:cover;
+background:#d1d5db;
+border:5px solid #2563eb;
+
+}
+
+.info{
+
+flex:1;
+
+}
+
+.info h2{
+
+font-size:40px;
+
+}
+
+.info p{
+
+margin-top:8px;
+color:#6b7280;
+
+}
+
+body.dark-mode .info p{
+
+color:#cbd5e1;
+
+}
+
+.estadisticas{
+
+display:flex;
+justify-content:space-around;
+margin:35px 0;
+
+}
+
+.estadisticas div{
+
+text-align:center;
+
+}
+
+.estadisticas h2{
+
+font-size:35px;
+color:#2563eb;
+
+}
+
+body.dark-mode .estadisticas h2{
+
+color:#60a5fa;
+
+}
+
+input{
+
+width:100%;
+padding:14px;
+margin-top:15px;
+border:none;
+border-radius:12px;
+background:#e5e7eb;
+font-size:16px;
+
+}
+
+body.dark-mode input{
+
+background:#374151;
+color:white;
+
+}
+
+button{
+
+margin-top:20px;
+width:100%;
+padding:15px;
+border:none;
+border-radius:12px;
+background:#2563eb;
+color:white;
+font-size:17px;
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#1d4ed8;
+
+}
+
+.inicio{
+
+position:fixed;
+bottom:20px;
+right:20px;
+width:auto;
+padding:12px 22px;
+
+}
